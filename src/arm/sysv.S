@@ -52,11 +52,15 @@
 #endif
 
 /* Conditionally compile unwinder directives.  */
+#if defined(__APPLE__)
+# define UNWIND @
+#else
 .macro UNWIND text:vararg
-#ifdef __ARM_EABI__
+# ifdef __ARM_EABI__
 	\text
-#endif	
+# endif	
 .endm
+#endif
 #if defined(HAVE_AS_CFI_PSEUDO_OP) && defined(__ARM_EABI__)
 	.cfi_sections	.debug_frame
 #endif
@@ -79,7 +83,7 @@
 
 #define ARM_FUNC_START(name, gl) \
 	.align	3; \
-	.ifne gl; .globl CNAME(name); FFI_HIDDEN(CNAME(name)); .endif; \
+	.if gl; .globl CNAME(name); FFI_HIDDEN(CNAME(name)); .endif; \
 	TYPE(name, %function); \
 	CNAME(name):
 
@@ -88,9 +92,11 @@
 
 /* Aid in defining a jump table with 8 bytes between entries.  */
 .macro E index
+#if !defined(__APPLE__)
 	.if . - 0b - 8*\index
 	.error "type table out of sync"
 	.endif
+#endif
 .endm
 
 	.text
@@ -99,7 +105,9 @@
 
 	/* We require interworking on LDM, which implies ARMv5T,
 	   which implies the existance of BLX.  */
+#if !defined(__APPLE__)
 	.arch	armv5t
+#endif
 
 	/* Note that we use STC and LDC to encode VFP instructions,
 	   so that we do not need ".fpu vfp", nor get that added to
@@ -114,11 +122,12 @@
 ARM_FUNC_START(ffi_call_VFP, 1)
 	UNWIND	.fnstart
 	cfi_startproc
-
+#if !defined(__APPLE__)
 	cmp	r3, #3			@ load only d0 if possible
 	ldcle	p11, cr0, [r0]		@ vldrle d0, [sp]
 	ldcgt	p11, cr0, [r0], {16}	@ vldmgt sp, {d0-d7}
 	add	r0, r0, #64		@ discard the vfp register args
+#endif
 	/* FALLTHRU */
 ARM_FUNC_END(ffi_call_VFP)
 
@@ -154,6 +163,14 @@ ARM_FUNC_START(ffi_call_SYSV, 1)
 	add	pc, pc, r3, lsl #3
 	nop
 0:
+#if defined(__APPLE__)
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+#else
 E ARM_TYPE_VFP_S
 	stc	p10, cr0, [r2]		@ vstr s0, [r2]
 	pop	{fp,pc}
@@ -163,6 +180,7 @@ E ARM_TYPE_VFP_D
 E ARM_TYPE_VFP_N
 	stc	p11, cr0, [r2], {8}	@ vstm r2, {d0-d3}
 	pop	{fp,pc}
+#endif
 E ARM_TYPE_INT64
 	str	r1, [r2, #4]
 	nop
@@ -200,9 +218,15 @@ ARM_FUNC_START(ffi_closure_SYSV, 1)
 	cfi_startproc
 	stmdb	sp!, {r0-r3}			@ save argument regs
 	cfi_adjust_cfa_offset(16)
+#if FFI_EXEC_TRAMPOLINE_TABLE
+	ldr	r0, [ip, #8]    @ load cif
+	ldr	r1, [ip, #8+4]  @ load fun
+	ldr	r2, [ip, #8+8]  @ load user_data
+#else
 	ldr	r0, [ip, #FFI_TRAMPOLINE_SIZE]	  @ load cif
 	ldr	r1, [ip, #FFI_TRAMPOLINE_SIZE+4]  @ load fun
 	ldr	r2, [ip, #FFI_TRAMPOLINE_SIZE+8]  @ load user_data
+#endif
 0:
 	add	ip, sp, #16			@ compute entry sp
 	sub	sp, sp, #64+32			@ allocate frame
@@ -241,6 +265,7 @@ ARM_FUNC_END(ffi_go_closure_VFP)
 ARM_FUNC_START(ffi_closure_VFP, 1)
 	UNWIND	.fnstart
 	cfi_startproc
+#if !defined(__APPLE__)
 	stmdb	sp!, {r0-r3}			@ save argument regs
 	cfi_adjust_cfa_offset(16)
 	ldr	r0, [ip, #FFI_TRAMPOLINE_SIZE]	  @ load cif
@@ -265,6 +290,7 @@ ARM_FUNC_START(ffi_closure_VFP, 1)
 	add	r2, sp, #8+64			@ load result
 	adr	r3, CNAME(ffi_closure_ret)
 	add	pc, r3, r0, lsl #3
+#endif
 	cfi_endproc
 	UNWIND	.fnend
 ARM_FUNC_END(ffi_closure_VFP)
@@ -278,6 +304,14 @@ ARM_FUNC_START(ffi_closure_ret, 0)
 	cfi_rel_offset(sp, 0)
 	cfi_rel_offset(lr, 4)
 0:
+#if defined(__APPLE__)
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
+#else
 E ARM_TYPE_VFP_S
 	ldc	p10, cr0, [r2]			@ vldr s0, [r2]
 	ldm	sp, {sp,pc}
@@ -287,6 +321,7 @@ E ARM_TYPE_VFP_D
 E ARM_TYPE_VFP_N
 	ldc	p11, cr0, [r2], {8}		@ vldm r2, {d0-d3}
 	ldm	sp, {sp,pc}
+#endif
 E ARM_TYPE_INT64
 	ldr	r1, [r2, #4]
 	nop
@@ -313,7 +348,7 @@ ARM_FUNC_END(ffi_closure_ret)
    keep all the magic numbers the same within ffi.c.  */
 
 	.align	12
-ARM_FUNC_START(ffi_closure_trampoline_table_page)
+ARM_FUNC_START(ffi_closure_trampoline_table_page, 1)
 .rept	4096 / 12
 	nop
 	ldr	ip, [pc, #-4092]

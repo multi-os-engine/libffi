@@ -344,9 +344,11 @@ ffi_call_int (ffi_cif *cif, void (*fn)(void), void *rvalue,
 	     inside, however, would get 16 byte alignment.  Since libffi does
 	     not support vectors, we need non concern ourselves with other
 	     cases.  */
+#if !defined(__APPLE__)
 	  if (t == FFI_TYPE_STRUCT && ty->alignment >= 16)
 	    align = 16;
-	    
+#endif
+
 	  if (dir < 0)
 	    {
 	      /* ??? These reverse argument ABIs are probably too old
@@ -467,8 +469,10 @@ ffi_closure_inner (struct closure_frame *frame, char *stack)
 	  size_t align = FFI_SIZEOF_ARG;
 
 	  /* See the comment in ffi_call_int.  */
+#if !defined(__APPLE__)
 	  if (t == FFI_TYPE_STRUCT && ty->alignment >= 16)
 	    align = 16;
+#endif
 
 	  if (dir < 0)
 	    {

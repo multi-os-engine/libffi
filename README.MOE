@@ -1,0 +1,13 @@
+libffi for Multi-OS Engine
+--------------------------
+
+This branch is based on the v3.2.1 tag of libffi.
+It only includes build fixes for iOS, tvOS and Mac and a new
+Mac-static target to create a static library version for OSX.
+
+The Xcode project does not automatically generate the darwin sources
+and headers.
+
+Instead the ./build_darwin.sh should be launched to build for all
+supported platforms.
+

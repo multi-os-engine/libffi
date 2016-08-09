@@ -33,3 +33,11 @@ libffi.xcodeproj/xcuserdata
 libffi.xcodeproj/project.xcworkspace
 build_*/
 darwin_*/
+build
+aarch64-unknown-linux-android
+arm-unknown-linux-androideabi
+i686-pc-linux-android
+mips64el-unknown-linux-android
+mipsel-unknown-linux-android
+x86_64-pc-linux-android
+x86_64-w64-mingw32

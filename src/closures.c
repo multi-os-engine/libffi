@@ -54,7 +54,9 @@
 #endif
 
 #if FFI_MMAP_EXEC_WRIT && !defined FFI_MMAP_EXEC_SELINUX
-# ifdef __linux__
+# ifdef __ANDROID__
+#  define FFI_MMAP_EXEC_SELINUX 0
+# elif defined __linux__
 /* When defined to 1 check for SELinux and if SELinux is active,
    don't attempt PROT_EXEC|PROT_WRITE mapping at all, as that
    might cause audit messages.  */

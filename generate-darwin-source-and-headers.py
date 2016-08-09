@@ -9,56 +9,88 @@ import argparse
 class Platform(object):
     pass
 
-class simulator_platform(Platform):
+class ios_simulator_platform(Platform):
     directory = 'darwin_ios'
     sdk = 'iphonesimulator'
     arch = 'i386'
     triple = 'i386-apple-darwin11'
-    version_min = '-miphoneos-version-min=7.0'
+    version_min = '-miphoneos-version-min=8.0'
 
     prefix = "#ifdef __i386__\n\n"
     suffix = "\n\n#endif"
     src_dir = 'x86'
-    src_files = ['darwin.S', 'win32.S', 'ffi.c']
+    src_files = ['sysv.S', 'ffi.c']
+    hdr_files = ['internal.h']
 
 
-class simulator64_platform(Platform):
+class ios_simulator64_platform(Platform):
     directory = 'darwin_ios'
     sdk = 'iphonesimulator'
     arch = 'x86_64'
     triple = 'x86_64-apple-darwin13'
-    version_min = '-miphoneos-version-min=7.0'
+    version_min = '-miphoneos-version-min=8.0'
 
     prefix = "#ifdef __x86_64__\n\n"
     suffix = "\n\n#endif"
     src_dir = 'x86'
-    src_files = ['darwin64.S', 'ffi64.c']
+    src_files = ['unix64.S', 'ffi64.c']
+    hdr_files = ['internal64.h']
 
 
-class device_platform(Platform):
+class ios_device_platform(Platform):
     directory = 'darwin_ios'
     sdk = 'iphoneos'
     arch = 'armv7'
     triple = 'arm-apple-darwin11'
-    version_min = '-miphoneos-version-min=7.0'
+    version_min = '-miphoneos-version-min=8.0'
 
     prefix = "#ifdef __arm__\n\n"
     suffix = "\n\n#endif"
     src_dir = 'arm'
-    src_files = ['sysv.S', 'trampoline.S', 'ffi.c']
+    src_files = ['sysv.S', 'ffi.c']
+    hdr_files = ['internal.h']
 
 
-class device64_platform(Platform):
+class ios_device64_platform(Platform):
     directory = 'darwin_ios'
     sdk = 'iphoneos'
     arch = 'arm64'
     triple = 'aarch64-apple-darwin13'
-    version_min = '-miphoneos-version-min=7.0'
+    version_min = '-miphoneos-version-min=8.0'
 
     prefix = "#ifdef __arm64__\n\n"
     suffix = "\n\n#endif"
     src_dir = 'aarch64'
     src_files = ['sysv.S', 'ffi.c']
+    hdr_files = ['internal.h']
+
+
+class tvos_simulator64_platform(Platform):
+    directory = 'darwin_tvos'
+    sdk = 'appletvsimulator'
+    arch = 'x86_64'
+    triple = 'x86_64-apple-darwin13'
+    version_min = '-mappletvos-version-min=9.0'
+
+    prefix = "#ifdef __x86_64__\n\n"
+    suffix = "\n\n#endif"
+    src_dir = 'x86'
+    src_files = ['unix64.S', 'ffi64.c']
+    hdr_files = ['internal64.h']
+
+
+class tvos_device64_platform(Platform):
+    directory = 'darwin_tvos'
+    sdk = 'appletvos'
+    arch = 'arm64'
+    triple = 'aarch64-apple-darwin13'
+    version_min = '-mappletvos-version-min=9.0'
+
+    prefix = "#ifdef __arm64__\n\n"
+    suffix = "\n\n#endif"
+    src_dir = 'aarch64'
+    src_files = ['sysv.S', 'ffi.c']
+    hdr_files = ['internal.h']
 
 
 class desktop32_platform(Platform):
@@ -68,7 +100,8 @@ class desktop32_platform(Platform):
     triple = 'i386-apple-darwin10'
     version_min = '-mmacosx-version-min=10.6'
     src_dir = 'x86'
-    src_files = ['darwin.S', 'win32.S', 'ffi.c']
+    src_files = ['sysv.S', 'ffi.c']
+    hdr_files = ['internal.h']
 
     prefix = "#ifdef __i386__\n\n"
     suffix = "\n\n#endif"
@@ -84,7 +117,8 @@ class desktop64_platform(Platform):
     prefix = "#ifdef __x86_64__\n\n"
     suffix = "\n\n#endif"
     src_dir = 'x86'
-    src_files = ['darwin64.S', 'ffi64.c']
+    src_files = ['unix64.S', 'ffi64.c']
+    hdr_files = ['internal64.h']
 
 
 def mkdir_p(path):
@@ -131,6 +165,7 @@ def copy_src_platform_files(platform):
     src_dir = os.path.join('src', platform.src_dir)
     dst_dir = os.path.join(platform.directory, 'src', platform.src_dir)
     copy_files(src_dir, dst_dir, filelist=platform.src_files, file_suffix=platform.arch, prefix=platform.prefix, suffix=platform.suffix)
+    copy_files(src_dir, dst_dir, filelist=platform.hdr_files, file_suffix=None, prefix=platform.prefix, suffix=platform.suffix)
 
 
 def build_target(platform, platform_headers):
@@ -149,7 +184,6 @@ def build_target(platform, platform_headers):
         subprocess.check_call(['../configure', '-host', platform.triple], env=env)
     finally:
         os.chdir(working_dir)
-
     for src_dir in [build_dir, os.path.join(build_dir, 'include')]:
         copy_files(src_dir,
                    os.path.join(platform.directory, 'include'),
@@ -162,22 +196,18 @@ def build_target(platform, platform_headers):
             platform_headers[filename].add((platform.prefix, platform.arch, platform.suffix))
 
 
-def make_tramp():
-    with open('src/arm/trampoline.S', 'w') as tramp_out:
-        p = subprocess.Popen(['bash', 'src/arm/gentramp.sh'], stdout=tramp_out)
-        p.wait()
-
-
-def generate_source_and_headers(generate_osx=True, generate_ios=True):
+def generate_source_and_headers(generate_osx=True, generate_ios=True, generate_tvos=False):
     copy_files('src', 'darwin_common/src', pattern='*.c')
     copy_files('include', 'darwin_common/include', pattern='*.h')
 
     if generate_ios:
-        make_tramp()
-        copy_src_platform_files(simulator_platform)
-        copy_src_platform_files(simulator64_platform)
-        copy_src_platform_files(device_platform)
-        copy_src_platform_files(device64_platform)
+        copy_src_platform_files(ios_simulator_platform)
+        copy_src_platform_files(ios_simulator64_platform)
+        copy_src_platform_files(ios_device_platform)
+        copy_src_platform_files(ios_device64_platform)
+    if generate_tvos:
+        copy_src_platform_files(tvos_simulator64_platform)
+        copy_src_platform_files(tvos_device64_platform)
     if generate_osx:
         copy_src_platform_files(desktop32_platform)
         copy_src_platform_files(desktop64_platform)
@@ -185,10 +215,13 @@ def generate_source_and_headers(generate_osx=True, generate_ios=True):
     platform_headers = collections.defaultdict(set)
 
     if generate_ios:
-        build_target(simulator_platform, platform_headers)
-        build_target(simulator64_platform, platform_headers)
-        build_target(device_platform, platform_headers)
-        build_target(device64_platform, platform_headers)
+        build_target(ios_simulator_platform, platform_headers)
+        build_target(ios_simulator64_platform, platform_headers)
+        build_target(ios_device_platform, platform_headers)
+        build_target(ios_device64_platform, platform_headers)
+    if generate_tvos:
+        build_target(tvos_simulator64_platform, platform_headers)
+        build_target(tvos_device64_platform, platform_headers)
     if generate_osx:
         build_target(desktop32_platform, platform_headers)
         build_target(desktop64_platform, platform_headers)
@@ -202,8 +235,9 @@ def generate_source_and_headers(generate_osx=True, generate_ios=True):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--only-ios', action='store_true', default=False)
-    parser.add_argument('--only-osx', action='store_true', default=False)
+    parser.add_argument('--disable-ios', action='store_true', default=False)
+    parser.add_argument('--disable-tvos', action='store_true', default=False)
+    parser.add_argument('--disable-osx', action='store_true', default=False)
     args = parser.parse_args()
 
-    generate_source_and_headers(generate_osx=not args.only_ios, generate_ios=not args.only_osx)
+    generate_source_and_headers(generate_osx=not args.disable_osx, generate_ios=not args.disable_ios, generate_tvos=False)
