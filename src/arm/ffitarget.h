@@ -56,6 +56,10 @@ typedef enum ffi_abi {
   unsigned short vfp_reg_free, vfp_nargs;	\
   signed char vfp_args[16]			\
 
+#if defined(__APPLE__)
+#define FFI_TARGET_SPECIFIC_STACK_SPACE_ALLOCATION
+#endif
+
 #define FFI_TARGET_SPECIFIC_VARIADIC
 #define FFI_TARGET_HAS_COMPLEX_TYPE
 

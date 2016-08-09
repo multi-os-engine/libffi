@@ -42,7 +42,7 @@ ffi_align (ffi_type *ty, void *p)
 {
   /* Align if necessary */
   size_t alignment;
-#ifdef _WIN32_WCE
+#if defined(_WIN32_WCE) || defined(__APPLE__)
   alignment = 4;
 #else
   alignment = ty->alignment;
@@ -203,6 +203,15 @@ ffi_prep_cif_machdep (ffi_cif *cif)
 {
   int flags = 0, cabi = cif->abi;
   size_t bytes = cif->bytes;
+
+#if defined(__APPLE__)
+  ffi_type** ptr;
+  unsigned i;
+  for (ptr = cif->arg_types, i = cif->nargs; i > 0; i--, ptr++)
+  {
+    bytes += ALIGN((*ptr)->size, FFI_SIZEOF_ARG);
+  }
+#endif
 
   /* Map out the register placements of VFP register args.  The VFP
      hard-float calling conventions are slightly more sophisticated
@@ -509,6 +518,22 @@ ffi_closure_inner_SYSV (ffi_cif *cif,
   void *rvalue = ffi_prep_incoming_args_SYSV (cif, frame->result,
 					      frame->argp, avalue);
   fun (cif, rvalue, avalue, user_data);
+
+  switch (cif->rtype->type) {
+    case FFI_TYPE_UINT8:
+      *(uint32_t*)rvalue = *(uint8_t*)rvalue;
+      break;
+    case FFI_TYPE_SINT8:
+      *(int32_t*)rvalue = *(int8_t*)rvalue;
+      break;
+    case FFI_TYPE_UINT16:
+      *(uint32_t*)rvalue = *(uint16_t*)rvalue;
+      break;
+    case FFI_TYPE_SINT16:
+      *(int32_t*)rvalue = *(int16_t*)rvalue;
+      break;
+  }
+
   return cif->flags;
 }
 
