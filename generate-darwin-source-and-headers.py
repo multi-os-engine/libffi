@@ -209,7 +209,7 @@ def generate_source_and_headers(generate_osx=True, generate_ios=True, generate_t
         copy_src_platform_files(tvos_simulator64_platform)
         copy_src_platform_files(tvos_device64_platform)
     if generate_osx:
-        copy_src_platform_files(desktop32_platform)
+        # copy_src_platform_files(desktop32_platform)
         copy_src_platform_files(desktop64_platform)
 
     platform_headers = collections.defaultdict(set)
@@ -223,7 +223,7 @@ def generate_source_and_headers(generate_osx=True, generate_ios=True, generate_t
         build_target(tvos_simulator64_platform, platform_headers)
         build_target(tvos_device64_platform, platform_headers)
     if generate_osx:
-        build_target(desktop32_platform, platform_headers)
+        # build_target(desktop32_platform, platform_headers)
         build_target(desktop64_platform, platform_headers)
 
     mkdir_p('darwin_common/include')
