@@ -21,7 +21,8 @@ rm -rf "$MOE_PREBUILTS_DIR/$MOE_PREBUILTS_TARGET_DIR"
 ./autogen.sh
 
 # Properties
-SDKS="x86_64-w64-mingw32 i686-w64-mingw32"
+# SDKS="x86_64-w64-mingw32 i686-w64-mingw32"
+SDKS="x86_64-w64-mingw32"
 
 # Build
 for SDK in $SDKS; do
