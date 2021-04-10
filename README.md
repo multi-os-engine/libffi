@@ -101,7 +101,6 @@ tested:
 | X86             | Interix          | GCC                     |
 | X86             | kFreeBSD         | GCC                     |
 | X86             | Linux            | GCC                     |
-| X86             | Mac OSX          | GCC                     |
 | X86             | OpenBSD          | GCC                     |
 | X86             | OS/2             | GCC                     |
 | X86             | Solaris          | GCC                     |
@@ -206,8 +205,8 @@ See the git log for details at http://github.com/libffi/libffi.
         Add Windows on ARM64 (WOA) support.
         Add Windows 32-bit ARM support.
         Raw java (gcj) API deprecated.
-	Add pre-built PDF documentation to source distribution.
-        Many new tests cases and bug fixes.
+        Add pre-built PDF documentation to source distribution.
+        Many new test cases and bug fixes.
         
     3.2.1 Nov-12-14
         Build fix for non-iOS AArch64 targets.

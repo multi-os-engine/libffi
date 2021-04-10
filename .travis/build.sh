@@ -8,16 +8,7 @@ else
     export SET_QEMU_CPU="-e QEMU_CPU=${QEMU_CPU}"
 fi
 
-# Default to podman where available, docker otherwise.
-# Override by setting the DOCKER environment variable.
-if test -z "$DOCKER"; then
-  which podman > /dev/null 2>&1
-  if [ $? != 0 ]; then
-    export DOCKER=docker
-  else
-    export DOCKER=podman
-  fi
-fi
+export DOCKER=docker
 
 function build_cfarm()
 {
@@ -37,7 +28,7 @@ function build_cfarm()
 function build_linux()
 {
     ./autogen.sh
-    ./configure ${HOST+--host=$HOST} ${CONFIGURE_OPTIONS}
+    ./configure ${HOST+--host=$HOST} ${CONFIGURE_OPTIONS} || cat */config.log
     make
     make dist
     make check RUNTESTFLAGS="-a $RUNTESTFLAGS"
@@ -50,7 +41,7 @@ function build_linux()
 
 function build_foreign_linux()
 {
-    ${DOCKER} run --rm -t -i -v `pwd`:/opt ${SET_QEMU_CPU} -e LIBFFI_TEST_OPTIMIZATION="${LIBFFI_TEST_OPTIMIZATION}" $2 bash -c /opt/.travis/build-in-container.sh
+    ${DOCKER} run --rm -t -i -v $(pwd):/opt ${SET_QEMU_CPU} -e LIBFFI_TEST_OPTIMIZATION="${LIBFFI_TEST_OPTIMIZATION}" $2 bash -c /opt/.travis/build-in-container.sh
 
     ./rlgl l https://rl.gl
     ID=$(./rlgl start)
@@ -60,7 +51,7 @@ function build_foreign_linux()
 
 function build_cross_linux()
 {
-    ${DOCKER} run --rm -t -i -v `pwd`:/opt ${SET_QEMU_CPU} -e HOST="${HOST}" -e CC="${HOST}-gcc-8 ${GCC_OPTIONS}" -e CXX="${HOST}-g++-8 ${GCC_OPTIONS}" -e LIBFFI_TEST_OPTIMIZATION="${LIBFFI_TEST_OPTIMIZATION}" moxielogic/cross-ci-build-container:latest bash -c /opt/.travis/build-in-container.sh
+    ${DOCKER} run --rm -t -i -v $(pwd):/opt ${SET_QEMU_CPU} -e HOST="${HOST}" -e CC="${HOST}-gcc-8 ${GCC_OPTIONS}" -e CXX="${HOST}-g++-8 ${GCC_OPTIONS}" -e LIBFFI_TEST_OPTIMIZATION="${LIBFFI_TEST_OPTIMIZATION}" moxielogic/cross-ci-build-container:latest bash -c /opt/.travis/build-in-container.sh
 
     ./rlgl l https://rl.gl
     ID=$(./rlgl start)
@@ -71,7 +62,7 @@ function build_cross_linux()
 function build_cross()
 {
     ${DOCKER} pull quay.io/moxielogic/libffi-ci-${HOST} 
-    ${DOCKER} run --rm -t -i -v `pwd`:/opt -e HOST="${HOST}" -e CC="${HOST}-gcc ${GCC_OPTIONS}" -e CXX="${HOST}-g++ ${GCC_OPTIONS}" -e TRAVIS_BUILD_DIR=/opt -e DEJAGNU="${DEJAGNU}" -e RUNTESTFLAGS="${RUNTESTFLAGS}" -e LIBFFI_TEST_OPTIMIZATION="${LIBFFI_TEST_OPTIMIZATION}" quay.io/moxielogic/libffi-ci-${HOST} bash -c /opt/.travis/build-cross-in-container.sh
+    ${DOCKER} run --rm -t -i -v $(pwd):/opt -e HOST="${HOST}" -e CC="${HOST}-gcc ${GCC_OPTIONS}" -e CXX="${HOST}-g++ ${GCC_OPTIONS}" -e TRAVIS_BUILD_DIR=/opt -e DEJAGNU="${DEJAGNU}" -e RUNTESTFLAGS="${RUNTESTFLAGS}" -e LIBFFI_TEST_OPTIMIZATION="${LIBFFI_TEST_OPTIMIZATION}" quay.io/moxielogic/libffi-ci-${HOST} bash -c /opt/.travis/build-cross-in-container.sh
 
     ./rlgl l https://rl.gl
     ID=$(./rlgl start)
@@ -96,6 +87,7 @@ function build_macosx()
     ./generate-darwin-source-and-headers.py --only-osx
     xcodebuild -showsdks
     xcodebuild -project libffi.xcodeproj -target "libffi-Mac" -configuration Release -sdk macosx10.13
+    echo "Finished build"
     exit $?
 }
 
@@ -112,7 +104,7 @@ case "$HOST" in
 	./autogen.sh
         build_foreign_linux arm moxielogic/arm32v7-ci-build-container:latest 
 	;;
-    aarch64-linux-gnu| powerpc64le-unknown-linux-gnu | mips64el-linux-gnu | sparc64-linux-gnu)
+    mips64el-linux-gnu | sparc64-linux-gnu)
         build_cfarm
 	;;
     bfin-elf )
@@ -127,11 +119,15 @@ case "$HOST" in
 	./autogen.sh
 	build_cross
 	;;
+    powerpc-eabisim )
+	./autogen.sh
+	build_cross
+	;;
     m68k-linux-gnu )
 	./autogen.sh
 	GCC_OPTIONS=-mcpu=547x build_cross_linux
 	;;
-    alpha-linux-gnu | sh4-linux-gnu | s390x-linux-gnu )
+    alpha-linux-gnu | sh4-linux-gnu )
 	./autogen.sh
 	build_cross_linux
 	;;
