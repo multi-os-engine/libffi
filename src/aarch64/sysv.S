@@ -19,6 +19,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 
+#if defined(__aarch64__) || defined(__arm64__)
 #define LIBFFI_ASM
 #include <fficonfig.h>
 #include <ffi.h>
@@ -43,6 +44,18 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 # define BE(X)	X
 #else
 # define BE(X)	0
+#endif
+
+#ifdef __ILP32__
+#define PTR_REG(n)      w##n
+#else
+#define PTR_REG(n)      x##n
+#endif
+
+#ifdef __ILP32__
+#define PTR_SIZE	4
+#else
+#define PTR_SIZE	8
 #endif
 
 	.text
@@ -186,9 +199,9 @@ CNAME(ffi_call_SYSV):
 	cfi_endproc
 
 	.globl	CNAME(ffi_call_SYSV)
+	FFI_HIDDEN(CNAME(ffi_call_SYSV))
 #ifdef __ELF__
 	.type	CNAME(ffi_call_SYSV), #function
-	.hidden	CNAME(ffi_call_SYSV)
 	.size CNAME(ffi_call_SYSV), .-CNAME(ffi_call_SYSV)
 #endif
 
@@ -225,9 +238,9 @@ CNAME(ffi_closure_SYSV_V):
 	cfi_endproc
 
 	.globl	CNAME(ffi_closure_SYSV_V)
+	FFI_HIDDEN(CNAME(ffi_closure_SYSV_V))
 #ifdef __ELF__
 	.type	CNAME(ffi_closure_SYSV_V), #function
-	.hidden	CNAME(ffi_closure_SYSV_V)
 	.size	CNAME(ffi_closure_SYSV_V), . - CNAME(ffi_closure_SYSV_V)
 #endif
 
@@ -235,7 +248,7 @@ CNAME(ffi_closure_SYSV_V):
 	cfi_startproc
 CNAME(ffi_closure_SYSV):
 	stp     x29, x30, [sp, #-ffi_closure_SYSV_FS]!
-	cfi_def_cfa_offset (ffi_closure_SYSV_FS)
+	cfi_adjust_cfa_offset (ffi_closure_SYSV_FS)
 	cfi_rel_offset (x29, 0)
 	cfi_rel_offset (x30, 8)
 0:
@@ -248,14 +261,9 @@ CNAME(ffi_closure_SYSV):
 	stp     x6, x7, [sp, #16 + 16*N_V_ARG_REG + 48]
 
 	/* Load ffi_closure_inner arguments.  */
-#if FFI_EXEC_TRAMPOLINE_TABLE
-	ldp	x0, x1, [x17, #16]	/* load cif, fn */
-	ldr	x2, [x17, #16+16]	/* load user_data */
-#else
-	ldp	x0, x1, [x17, #FFI_TRAMPOLINE_SIZE]	/* load cif, fn */
-	ldr	x2, [x17, #FFI_TRAMPOLINE_SIZE+16]	/* load user_data */
-#endif
-//.Ldo_closure:
+	ldp	PTR_REG(0), PTR_REG(1), [x17, #FFI_TRAMPOLINE_CLOSURE_OFFSET]	/* load cif, fn */
+	ldr	PTR_REG(2), [x17, #FFI_TRAMPOLINE_CLOSURE_OFFSET+PTR_SIZE*2]	/* load user_data */
+.Ldo_closure:
 	add	x3, sp, #16				/* load context */
 	add	x4, sp, #ffi_closure_SYSV_FS		/* load stack */
 	add	x5, sp, #16+CALL_CONTEXT_SIZE		/* load rvalue */
@@ -289,7 +297,7 @@ CNAME(ffi_closure_SYSV):
 	nop
 8:	ldr	s3, [x3, #12]		/* S4 */
 	nop
-9:	ldr	s2, [x2, #8]		/* S3 */
+9:	ldr	s2, [x3, #8]		/* S3 */
 	nop
 10:	ldp	s0, s1, [x3]		/* S2 */
 	b	99f
@@ -335,18 +343,41 @@ CNAME(ffi_closure_SYSV):
 	nop
 31:					/* reserved */
 99:	ldp     x29, x30, [sp], #ffi_closure_SYSV_FS
-	cfi_def_cfa_offset (0)
+	cfi_adjust_cfa_offset (-ffi_closure_SYSV_FS)
 	cfi_restore (x29)
 	cfi_restore (x30)
 	ret
 	cfi_endproc
 
 	.globl	CNAME(ffi_closure_SYSV)
+	FFI_HIDDEN(CNAME(ffi_closure_SYSV))
 #ifdef __ELF__
 	.type	CNAME(ffi_closure_SYSV), #function
-	.hidden	CNAME(ffi_closure_SYSV)
 	.size	CNAME(ffi_closure_SYSV), . - CNAME(ffi_closure_SYSV)
 #endif
+
+#if FFI_EXEC_TRAMPOLINE_TABLE
+
+#ifdef __MACH__
+#include <mach/machine/vm_param.h>
+    .align PAGE_MAX_SHIFT
+CNAME(ffi_closure_trampoline_table_page):
+    .rept PAGE_MAX_SIZE / FFI_TRAMPOLINE_SIZE
+    adr x16, -PAGE_MAX_SIZE
+    ldp x17, x16, [x16]
+    br x16
+	nop		/* each entry in the trampoline config page is 2*sizeof(void*) so the trampoline itself cannot be smaller that 16 bytes */
+    .endr
+
+    .globl CNAME(ffi_closure_trampoline_table_page)
+    FFI_HIDDEN(CNAME(ffi_closure_trampoline_table_page))
+    #ifdef __ELF__
+    	.type	CNAME(ffi_closure_trampoline_table_page), #function
+    	.size	CNAME(ffi_closure_trampoline_table_page), . - CNAME(ffi_closure_trampoline_table_page)
+    #endif
+#endif
+
+#endif /* FFI_EXEC_TRAMPOLINE_TABLE */
 
 #ifdef FFI_GO_CLOSURES
 	.align 4
@@ -366,9 +397,9 @@ CNAME(ffi_go_closure_SYSV_V):
 	cfi_endproc
 
 	.globl	CNAME(ffi_go_closure_SYSV_V)
+	FFI_HIDDEN(CNAME(ffi_go_closure_SYSV_V))
 #ifdef __ELF__
 	.type	CNAME(ffi_go_closure_SYSV_V), #function
-	.hidden	CNAME(ffi_go_closure_SYSV_V)
 	.size	CNAME(ffi_go_closure_SYSV_V), . - CNAME(ffi_go_closure_SYSV_V)
 #endif
 
@@ -389,42 +420,21 @@ CNAME(ffi_go_closure_SYSV):
 	stp     x6, x7, [sp, #16 + 16*N_V_ARG_REG + 48]
 
 	/* Load ffi_closure_inner arguments.  */
-	ldp	x0, x1, [x18, #8]			/* load cif, fn */
+	ldp	PTR_REG(0), PTR_REG(1), [x18, #PTR_SIZE]/* load cif, fn */
 	mov	x2, x18					/* load user_data */
-	//b	.Ldo_closure
+	b	.Ldo_closure
 	cfi_endproc
 
 	.globl	CNAME(ffi_go_closure_SYSV)
+	FFI_HIDDEN(CNAME(ffi_go_closure_SYSV))
 #ifdef __ELF__
 	.type	CNAME(ffi_go_closure_SYSV), #function
-	.hidden	CNAME(ffi_go_closure_SYSV)
 	.size	CNAME(ffi_go_closure_SYSV), . - CNAME(ffi_go_closure_SYSV)
 #endif
 #endif /* FFI_GO_CLOSURES */
+#endif /* __arm64__ */
 
 #if defined __ELF__ && defined __linux__
 	.section .note.GNU-stack,"",%progbits
 #endif
 
-#if FFI_EXEC_TRAMPOLINE_TABLE
-
-/* ??? The iOS support should be updated.  The first insn used to
-   be STMFD, but that's been moved into ffi_closure_SYSV.  If the
-   writable page is put after this one we can make use of the
-   pc+8 feature of the architecture.  We can also reduce the size
-   of the thunk to 8 and pack more of these into the page.
-
-   In the meantime, simply replace the STMFD with a NOP so as to
-   keep all the magic numbers the same within ffi.c.  */
-
-	.align	16
-.globl	CNAME(ffi_closure_trampoline_table_page)
-CNAME(ffi_closure_trampoline_table_page):
-.rept	4096 * 4 / 16
-	nop
-    ldr	x16, -16380
-    ldr x17, -16392
-    br	x16
-.endr
-
-#endif
