@@ -10,6 +10,26 @@
 		43B5D3F81D35473200D1E1FD /* ffiw64_x86_64.c in Sources */ = {isa = PBXBuildFile; fileRef = 43B5D3F71D35473200D1E1FD /* ffiw64_x86_64.c */; };
 		43B5D3FA1D3547CE00D1E1FD /* win64_x86_64.S in Sources */ = {isa = PBXBuildFile; fileRef = 43B5D3F91D3547CE00D1E1FD /* win64_x86_64.S */; };
 		43E9A5C81D352C1500926A8F /* unix64_x86_64.S in Sources */ = {isa = PBXBuildFile; fileRef = 43E9A5C61D352C1500926A8F /* unix64_x86_64.S */; };
+		55815C4D26286E1F005B6E03 /* ffi.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA713E187F1D8600A76262 /* ffi.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C4E26286E1F005B6E03 /* ffi_common.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA713F187F1D8600A76262 /* ffi_common.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C4F26286E1F005B6E03 /* fficonfig.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7140187F1D8600A76262 /* fficonfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C5026286E1F005B6E03 /* ffitarget.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7141187F1D8600A76262 /* ffitarget.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C5126286E1F005B6E03 /* ffi_arm64.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA715E187F1D9B00A76262 /* ffi_arm64.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C5226286E1F005B6E03 /* ffi_armv7.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA715F187F1D9B00A76262 /* ffi_armv7.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C5326286E1F005B6E03 /* ffi_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7161187F1D9B00A76262 /* ffi_x86_64.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C5426286E1F005B6E03 /* fficonfig_arm64.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7162187F1D9B00A76262 /* fficonfig_arm64.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C5526286E1F005B6E03 /* fficonfig_armv7.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7163187F1D9B00A76262 /* fficonfig_armv7.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C5626286E1F005B6E03 /* fficonfig_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7165187F1D9B00A76262 /* fficonfig_x86_64.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C5726286E1F005B6E03 /* ffitarget_arm64.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7166187F1D9B00A76262 /* ffitarget_arm64.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C5826286E1F005B6E03 /* ffitarget_armv7.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7167187F1D9B00A76262 /* ffitarget_armv7.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C5926286E1F005B6E03 /* ffitarget_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7169187F1D9B00A76262 /* ffitarget_x86_64.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C5F2628703F005B6E03 /* ffi.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA713E187F1D8600A76262 /* ffi.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C602628703F005B6E03 /* ffi_common.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA713F187F1D8600A76262 /* ffi_common.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C612628703F005B6E03 /* fficonfig.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7140187F1D8600A76262 /* fficonfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C622628703F005B6E03 /* ffitarget.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7141187F1D8600A76262 /* ffitarget.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C632628703F005B6E03 /* ffi_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7183187F1DA100A76262 /* ffi_x86_64.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C642628703F005B6E03 /* fficonfig_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7185187F1DA100A76262 /* fficonfig_x86_64.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55815C652628703F005B6E03 /* ffitarget_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7187187F1DA100A76262 /* ffitarget_x86_64.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DBFA714A187F1D8600A76262 /* ffi.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA713E187F1D8600A76262 /* ffi.h */; };
 		DBFA714B187F1D8600A76262 /* ffi_common.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA713F187F1D8600A76262 /* ffi_common.h */; };
 		DBFA714C187F1D8600A76262 /* fficonfig.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7140187F1D8600A76262 /* fficonfig.h */; };
@@ -335,6 +355,40 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		55815C4C26286D9D005B6E03 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				55815C4D26286E1F005B6E03 /* ffi.h in Headers */,
+				55815C4E26286E1F005B6E03 /* ffi_common.h in Headers */,
+				55815C4F26286E1F005B6E03 /* fficonfig.h in Headers */,
+				55815C5026286E1F005B6E03 /* ffitarget.h in Headers */,
+				55815C5126286E1F005B6E03 /* ffi_arm64.h in Headers */,
+				55815C5226286E1F005B6E03 /* ffi_armv7.h in Headers */,
+				55815C5326286E1F005B6E03 /* ffi_x86_64.h in Headers */,
+				55815C5426286E1F005B6E03 /* fficonfig_arm64.h in Headers */,
+				55815C5526286E1F005B6E03 /* fficonfig_armv7.h in Headers */,
+				55815C5626286E1F005B6E03 /* fficonfig_x86_64.h in Headers */,
+				55815C5726286E1F005B6E03 /* ffitarget_arm64.h in Headers */,
+				55815C5826286E1F005B6E03 /* ffitarget_armv7.h in Headers */,
+				55815C5926286E1F005B6E03 /* ffitarget_x86_64.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		55815C5E2628700C005B6E03 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				55815C5F2628703F005B6E03 /* ffi.h in Headers */,
+				55815C602628703F005B6E03 /* ffi_common.h in Headers */,
+				55815C612628703F005B6E03 /* fficonfig.h in Headers */,
+				55815C622628703F005B6E03 /* ffitarget.h in Headers */,
+				55815C632628703F005B6E03 /* ffi_x86_64.h in Headers */,
+				55815C642628703F005B6E03 /* fficonfig_x86_64.h in Headers */,
+				55815C652628703F005B6E03 /* ffitarget_x86_64.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DB13B18F1849DF510010F42D /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -359,6 +413,7 @@
 				43B5D3FB1D35480D00D1E1FD /* Run Script */,
 				DB13B1621849DF1E0010F42D /* Sources */,
 				DB13B1641849DF1E0010F42D /* CopyFiles */,
+				55815C4C26286D9D005B6E03 /* Headers */,
 			);
 			buildRules = (
 			);
@@ -410,6 +465,7 @@
 				FDDB2F481F5D846400EF414E /* ShellScript */,
 				FDDB2F491F5D846400EF414E /* Sources */,
 				FDB52FE11F6156E000AA92E6 /* CopyFiles */,
+				55815C5E2628700C005B6E03 /* Headers */,
 			);
 			buildRules = (
 			);
@@ -433,6 +489,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = DB13B15B1849DEB70010F42D;
