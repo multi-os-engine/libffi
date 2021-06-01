@@ -93,21 +93,7 @@ class tvos_device64_platform(Platform):
     hdr_files = ['internal.h']
 
 
-class desktop32_platform(Platform):
-    directory = 'darwin_osx'
-    sdk = 'macosx'
-    arch = 'i386'
-    triple = 'i386-apple-darwin10'
-    version_min = '-mmacosx-version-min=10.6'
-    src_dir = 'x86'
-    src_files = ['sysv.S', 'ffi.c']
-    hdr_files = ['internal.h']
-
-    prefix = "#ifdef __i386__\n\n"
-    suffix = "\n\n#endif"
-
-
-class desktop64_platform(Platform):
+class desktop_amd64_platform(Platform):
     directory = 'darwin_osx'
     sdk = 'macosx'
     arch = 'x86_64'
@@ -119,6 +105,20 @@ class desktop64_platform(Platform):
     src_dir = 'x86'
     src_files = ['unix64.S', 'ffi64.c']
     hdr_files = ['internal64.h']
+
+
+class desktop_arm64_platform(Platform):
+    directory = 'darwin_osx'
+    sdk = 'macosx'
+    arch = 'arm64'
+    triple = 'aarch64-apple-darwin20'
+    version_min = '-mmacosx-version-min=11.0'
+
+    prefix = "#ifdef __arm64__\n\n"
+    suffix = "\n\n#endif"
+    src_dir = 'aarch64'
+    src_files = ['sysv.S', 'ffi.c']
+    hdr_files = ['internal.h']
 
 
 def mkdir_p(path):
@@ -209,8 +209,8 @@ def generate_source_and_headers(generate_osx=True, generate_ios=True, generate_t
         copy_src_platform_files(tvos_simulator64_platform)
         copy_src_platform_files(tvos_device64_platform)
     if generate_osx:
-        # copy_src_platform_files(desktop32_platform)
-        copy_src_platform_files(desktop64_platform)
+        copy_src_platform_files(desktop_amd64_platform)
+        copy_src_platform_files(desktop_arm64_platform)
 
     platform_headers = collections.defaultdict(set)
 
@@ -223,8 +223,8 @@ def generate_source_and_headers(generate_osx=True, generate_ios=True, generate_t
         build_target(tvos_simulator64_platform, platform_headers)
         build_target(tvos_device64_platform, platform_headers)
     if generate_osx:
-        # build_target(desktop32_platform, platform_headers)
-        build_target(desktop64_platform, platform_headers)
+        build_target(desktop_amd64_platform, platform_headers)
+        build_target(desktop_arm64_platform, platform_headers)
 
     mkdir_p('darwin_common/include')
     for header_name, tag_tuples in platform_headers.items():
