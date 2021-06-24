@@ -202,7 +202,7 @@ def generate_source_and_headers(generate_osx=True, generate_ios=True, generate_t
     copy_files('include', 'darwin_common/include', pattern='*.h')
 
     if generate_ios:
-        copy_src_platform_files(ios_simulator_platform)
+        # copy_src_platform_files(ios_simulator_platform)
         copy_src_platform_files(ios_simulator64_platform)
         copy_src_platform_files(ios_device_platform)
         copy_src_platform_files(ios_device64_platform)
@@ -216,7 +216,7 @@ def generate_source_and_headers(generate_osx=True, generate_ios=True, generate_t
     platform_headers = collections.defaultdict(set)
 
     if generate_ios:
-        build_target(ios_simulator_platform, platform_headers)
+        # build_target(ios_simulator_platform, platform_headers)
         build_target(ios_simulator64_platform, platform_headers)
         build_target(ios_device_platform, platform_headers)
         build_target(ios_device64_platform, platform_headers)
